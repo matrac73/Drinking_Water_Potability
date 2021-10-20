@@ -16,7 +16,12 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_curve
 
-warnings.filterwarnings("ignore", category=FutureWarning) # empêcher les warning de s'afficher
+def add(a,b):
+    return a+b
+
+def eviter_warnings():
+    print("test")
+    warnings.filterwarnings("ignore", category=FutureWarning) # empêcher les warning de s'afficher
 
 ## Recupération des données brut sous forme d'un dataframe
 df = pd.read_csv(r"./data/drinking_water_potability.csv")
