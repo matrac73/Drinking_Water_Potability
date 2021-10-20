@@ -1,7 +1,5 @@
 # Information sur le projet
 
-Information sur le projet :
-
 A rendre pour le 1er novembre
 Un rapport écrit (5 pages)
 Code source du projet (sur GitHub ou Gitlab)
