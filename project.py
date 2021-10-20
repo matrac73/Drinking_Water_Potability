@@ -1,26 +1,43 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+import warnings
 
-# Recupération des données brut sous forme d'un dataframe
+warnings.filterwarnings("ignore", category=FutureWarning) # empêcher les warning de s'afficher
+
+## Recupération des données brut sous forme d'un dataframe
 df = pd.read_csv(r"./data/drinking_water_potability.csv")
-
+# print(df.shape)
 # print(df) # Affichage des données dataframe
 # print(df.head()) # tête du dataframe
 # print(df.describe()) # statistiques descriptives du dataframe
 
+## Affichage des variables explicatives
 data = df.to_numpy() # convertir le dataframe en array
-# print(data) # Affichage des données array
-
-# import pdb; pdb.set_trace() # debugger
-
 fig = plt.figure(figsize=(15,9)) # création de la fenetre
-fig.canvas.set_window_title('Drinking Water Potability - Data Visualization') # titre de la fenêtre
+fig.canvas.set_window_title('Drinking Water Potability - Variable Distribution') # titre de la fenêtre
 plt.style.use('seaborn-whitegrid') # style de grille
 for i in range(len(data[0][:-1])):
-    ax = plt.subplot(331+i) # changer de subplot
-    ax.set_title(df.columns[i]) # sous-titres
-    ax.grid(True) # activer grille
-    ax.hist(data[:,i], 60, facecolor='#2ab0ff', edgecolor='#169acf', alpha=0.75) # plot la data
+    ax = plt.subplot(3,3,1+i) # changer de subplot
+    sns.distplot(df[df.columns[i]], color = '#2a7bff') # afficher le barplot et la repartition
 plt.suptitle("Histogrammes des variables explicatives", fontsize=20) # titre principal
 plt.show() # afficher le tout
+
+## Check for null values
+print(df.isnull().sum()) # afficher les valeurs manquantes au dataset
+
+## Clean dataset by replacing missing values
+df['ph'] = df['ph'].fillna(df['ph'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+df['Sulfate'] = df['Sulfate'].fillna(df['Sulfate'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+
+# sns.pairplot(data=df, height=1, plot_kws=dict(marker="+", linewidth=1))
+# plt.show()
+
+# columns = [x for x in df.columns if x != 'Potability']
+# plt.figure(figsize=(15,9))
+# for i in range(9):
+#     plt.subplot(3,3,i+1)
+#     sns.boxplot(data=df,x = 'Potability' ,y= columns[i],showfliers=False)
+# plt.show()
