@@ -1,3 +1,17 @@
+# Information sur le projet
+
+Information sur le projet :
+A rendre pour le 1er novembre
+Un rapport écrit (5 pages)
+Code source du projet (sur GitHub ou Gitlab)
+Une soutenance orale aura lieu en présentiel le jour 12 novembre.
+
+Lien vers descriptif du projet :
+https://centralesupelec.edunao.com/pluginfile.php/171459/course/section/30034/Zennaro%20Maxime%20-%20Potabilite%CC%81%20de%20leau.pdf
+
+Lien vers challenge Kaggle :
+https://www.kaggle.com/artimule/drinking-water-probability
+
 # Drinking_Water_Potability
 Access to safe drinking water is essential to health, a basic human right, and a component of effective policy for health protection. This is important as a health and development issue at a national, regional, and local level. In some regions, it has been shown that investments in water supply and sanitation can yield a net economic benefit, since the reductions in adverse health effects and health care costs outweigh the costs of undertaking the interventions.
 
