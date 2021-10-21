@@ -36,9 +36,6 @@ jupyter lab
 ```
 10 . Exectuer les cellules de **drinking_water_potability.ipynb** dans l'ordre
 
-# Ultiliser le projet
-
-
 
 # Information sur le projet
 
