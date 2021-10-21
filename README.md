@@ -28,7 +28,7 @@ python -m pip install -r requirements.txt
 ```
 8 . Ajouter l'environement à jupyter lab
 ``` bash
-python -m ipykernel install --user --name=myenv
+python -m ipykernel install --user --name=drinking_water_potability
 ```
 
 # Ultiliser le projet
