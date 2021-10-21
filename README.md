@@ -34,7 +34,7 @@ python -m ipykernel install --user --name=drinking_water_potability
 ``` bash
 jupyter lab
 ```
-10 . Exectuer les cellules de **drinking_water_potability.ipynb** dans l'ordre
+10 . Choisir le bon kernel (en haut à droite) et exectuer les cellules de **drinking_water_potability.ipynb** dans l'ordre
 
 
 # Information sur le projet
