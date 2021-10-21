@@ -9,13 +9,15 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # from sklearn.metrics import log_loss
 # from sklearn.metrics import roc_auc_score
 # import statsmodels.api as sm
 # import sklearn
 # from sklearn.preprocessing import StandardScaler
-# from sklearn.model_selection import train_test_split,GridSearchCV
+# ,GridSearchCV
 # 
 # from sklearn.svm import SVC
 # from sklearn.tree import DecisionTreeClassifier
@@ -132,6 +134,14 @@ def fitting_RF_model():
     RF.fit(X_train, y_train)
     print(f"{t.ctime(t.time())} : model RF ajusté")
     
+def fitting_SVM_model():
+    """Création d'un model Support Vector Machine"""
+    print("Ajustement du model SVM...", end="\r")
+    global SVM
+    SVM = RandomForestClassifier()
+    SVM.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model SVM ajusté")
+    
 def testing_KNN_model():
     """Test du model K-Nearest Neighbours"""
     print("Ajustement du model KNN...", end="\r")
@@ -156,6 +166,14 @@ def testing_RF_model():
     print(f"{t.ctime(t.time())} : model RF testé")
     print(f"Accuracy RF : {accuracy} %\n")
     
+def testing_SVM_model():
+    """Test du model Support Vector Machine"""
+    print("Ajustement du model SVM...", end="\r")
+    y_test_hat = SVM.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model SVM testé")
+    print(f"Accuracy RF : {accuracy} %\n")
+    
 def finding_best_RF_model(n_estimators, max_depth, min_samples_split, min_samples_leaf, bootstrap):
     print("Recherche des meilleurs hyperparamètres de RF...", end="\r")
     param_grid = {'n_estimators': n_estimators, 'max_depth': max_depth, 'min_samples_split': min_samples_split, 'min_samples_leaf': min_samples_leaf, 'bootstrap': bootstrap}
@@ -167,10 +185,13 @@ def finding_best_RF_model(n_estimators, max_depth, min_samples_split, min_sample
     return RF_random.best_params_
     
 def fitting_testing_best_RF_model(dict):
-    RF = RandomForestClassifier(dict[n_estimators], dict[min_samples_split], dict[min_samples_leaf], dict[max_depth], dict[bootstrap])
+    print("Ajustement et test du meilleur model RF...", end="\r")
+    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
     RF.fit(X_train, y_train)
     y_test_hat = RF.predict(X_test)
     accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : meilleur model RF testé et ajusté")
+    print(f"Accuracy RF : {accuracy} %\n")
     
     
     
