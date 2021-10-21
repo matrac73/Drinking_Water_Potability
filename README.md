@@ -26,6 +26,14 @@ cd ./Drinking_Water_Potability/
 ``` bash
 python -m pip install -r requirements.txt
 ```
+8 . Ajouter l'environement à jupyter lab
+``` bash
+python -m ipykernel install --user --name=myenv
+```
+
+# Ultiliser le projet
+
+
 
 # Information sur le projet
 
