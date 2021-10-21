@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import RandomizedSearchCV
 
 # from sklearn.metrics import log_loss
 # from sklearn.metrics import roc_auc_score
@@ -155,11 +156,34 @@ def testing_RF_model():
     print(f"{t.ctime(t.time())} : model RF testé")
     print(f"Accuracy RF : {accuracy} %\n")
     
+def finding_best_RF_model(n_estimators, max_depth, min_samples_split, min_samples_leaf, bootstrap):
+    print("Recherche des meilleurs hyperparamètres de RF...", end="\r")
+    param_grid = {'n_estimators': n_estimators, 'max_depth': max_depth, 'min_samples_split': min_samples_split, 'min_samples_leaf': min_samples_leaf, 'bootstrap': bootstrap}
+    global RF_random
+    RF_random = RandomizedSearchCV(estimator = RF, param_distributions = param_grid, n_iter = 100, cv = 3, verbose=0, random_state=1984, n_jobs = -1)
+    RF_random.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : Meilleurs hyperparamètre de RF trouvé")
+    print(f"Meilleurs Hyperparamètres : {RF_random.best_params_}")
+    return RF_random.best_params_
     
-#     X_train, y_train = SMOTE(random_state=1,n_jobs=-1).fit_resample(X_train,y_train)
-#     X_train_sm = sm.add_constant(X_train)
-#     lm = sm.GLM(y_train,X_train_sm,family=sm.families.Binomial()).fit()
-#     print(lm.summary())
+def fitting_testing_best_RF_model(dict):
+    RF = RandomForestClassifier(dict[n_estimators], dict[min_samples_split], dict[min_samples_leaf], dict[max_depth], dict[bootstrap])
+    RF.fit(X_train, y_train)
+    y_test_hat = RF.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+# X_train, y_train = SMOTE(random_state=1,n_jobs=-1).fit_resample(X_train,y_train)
+# X_train_sm = sm.add_constant(X_train)
+# lm = sm.GLM(y_train,X_train_sm,family=sm.families.Binomial()).fit()
+# print(lm.summary())
 
 # def vif(data):
 #     res = pd.DataFrame()
