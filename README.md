@@ -1,3 +1,7 @@
+# Setup du projet
+
+Le projet tourne sur **python 3.8.5**
+
 # Information sur le projet
 
 A rendre pour le 1er novembre
