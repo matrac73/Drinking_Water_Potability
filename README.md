@@ -34,6 +34,7 @@ python -m ipykernel install --user --name=drinking_water_potability
 ``` bash
 jupyter lab
 ```
+10 . Exectuer les cellules dans l'ordre
 
 # Ultiliser le projet
 
