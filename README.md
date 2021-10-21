@@ -1,7 +1,5 @@
 # Setup du projet
 
-test mathieu
-
 1 . Télécharger **anaconda** et ajouter **conda** au PATH (si ce n'est pas déja fait)
 
 2 . Créer un environement virtuel anaconda avec la bonne version de python :
