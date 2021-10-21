@@ -1,3 +1,45 @@
+# Setup du projet
+
+1 . Télécharger **anaconda** et ajouter **conda** au PATH (si ce n'est pas déja fait)
+
+2 . Créer un environement virtuel anaconda avec la bonne version de python :
+``` bash
+conda create -n drinking_water_potability python=3.8.5
+```
+3 . Activer l'environement virtuel :
+``` bash
+conda activate drinking_water_potability
+```
+4 . Se placer dans le répertoire dans lequel on veut insaller le dépot git :
+``` bash
+cd ./path/to/repository/
+```
+5 . Cloner le dépot git :
+``` bash
+git clone https://github.com/matrac73/Drinking_Water_Potability.git
+```
+6 . Se placer dans le répertoire qui viens d'être crée :
+``` bash
+cd ./Drinking_Water_Potability/
+```
+7 . Télécharger les dépendances :
+``` bash
+python -m pip install -r requirements.txt
+```
+8 . Ajouter l'environement à jupyter lab
+``` bash
+python -m ipykernel install --user --name=drinking_water_potability
+```
+9 . Lancer Jupyter Lab
+``` bash
+jupyter lab
+```
+10 . Exectuer les cellules dans l'ordre
+
+# Ultiliser le projet
+
+
+
 # Information sur le projet
 
 A rendre pour le 1er novembre
