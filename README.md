@@ -1,8 +1,25 @@
 # Setup du projet
 
 Le projet tourne sur **python 3.8.5**
+
+#### Mettre en place le projet sur **Anaconda Powershell** grace à **conda**
+(après avoir téléchargé **anaconda** et ajouté **conda** au PATH)
+
+Créer un environement virtuel anaconda avec la bonne version de python :
 ``` bash
-python bot.py
+conda create -n drinking_water_potability python=3.8.5
+```
+Activer l'environement virtuel :
+``` bash
+conda activate drinking_water_potability
+```
+Se placer dans le répertoire dans lequel on veut insaller le dépot git :
+``` bash
+cd path/to/repository
+```
+Cloner le dépot git :
+``` bash
+git clone https://github.com/matrac73/Drinking_Water_Potability.git
 ```
 
 # Information sur le projet
