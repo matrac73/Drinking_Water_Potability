@@ -3,7 +3,7 @@
 Le projet tourne sur **python 3.8.5**
 
 #### Mettre en place le projet sur **Anaconda Powershell** grace à **conda**
-(après avoir téléchargé **anaconda** et ajouté **conda** au PATH)
+1.Télécharger **anaconda** et ajouter **conda** au PATH)
 
 Créer un environement virtuel anaconda avec la bonne version de python :
 ``` bash
