@@ -1,6 +1,9 @@
 # Setup du projet
 
 Le projet tourne sur **python 3.8.5**
+``` bash
+python bot.py
+```
 
 # Information sur le projet
 
