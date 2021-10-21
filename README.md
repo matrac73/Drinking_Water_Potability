@@ -30,6 +30,10 @@ python -m pip install -r requirements.txt
 ``` bash
 python -m ipykernel install --user --name=drinking_water_potability
 ```
+9 . Lancer Jupyter Lab
+``` bash
+jupyter lab
+```
 
 # Ultiliser le projet
 
