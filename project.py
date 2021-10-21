@@ -3,23 +3,31 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import warnings
-import statsmodels.api as sm
-import sklearn
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split,GridSearchCV
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier
-from imblearn.over_sampling import SMOTE
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import roc_curve
 import time as t
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+# from sklearn.metrics import log_loss
+# from sklearn.metrics import roc_auc_score
+# import statsmodels.api as sm
+# import sklearn
+# from sklearn.preprocessing import StandardScaler
+# from sklearn.model_selection import train_test_split,GridSearchCV
+# 
+# from sklearn.svm import SVC
+# from sklearn.tree import DecisionTreeClassifier
+# from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier
+# from imblearn.over_sampling import SMOTE
+# from statsmodels.stats.outliers_influence import variance_inflation_factor
+# from sklearn.metrics import confusion_matrix
+# from sklearn.metrics import roc_curve
 
 def avoid_warnings():
     print("Supression des Warnings...", end="\r")
     warnings.filterwarnings("ignore", category=FutureWarning) # empêcher les warning de s'afficher
+    warnings.filterwarnings("ignore", category=UserWarning) # empêcher les warning de s'afficher
     print(f"{t.ctime(t.time())} : Warnings Suprimés")
 
 def load_data(csv_path, disp):
@@ -79,17 +87,79 @@ def heatmap_corr():
     sns.heatmap(df.corr(), annot=True, cmap = 'RdYlGn', vmin=-1, vmax=1) # matrice de corrélation
     plt.show() # afficher le tout
 
-# ## Séparer les données en train set et test set
-# X_train, X_test, y_train, y_test = train_test_split(df[[c for c in df.columns if c != 'Potability']],df['Potability'],train_size = 0.7,random_state = 1)
+def split_dataset(ratio, disp):
+    """Séparer les données en train set et test set"""
+    print("Séparation du dataset...", end="\r")
+    global X_train, X_test, y_train, y_test
+    X_train, X_test, y_train, y_test = train_test_split(df[[c for c in df.columns if c !='Potability']],df['Potability'],train_size = ratio,random_state = 1)
+    print(f"{t.ctime(t.time())} : Dataset séparé")
+    if disp:
+        print(f"X_train : {X_train.shape}")
+        print(f"X_test  : {X_test.shape}")
+        print(f"y_train : {y_train.shape}")
+        print(f"y_test  : {y_test.shape}")
 
-# ## Scaling des données des variables explicatives
-# sc = StandardScaler()
-# X_train[X_train.columns] = sc.fit_transform(X_train)
-# X_test[X_test.columns] = sc.transform(X_test)
-# X_train, y_train = SMOTE(random_state=1,n_jobs=-1).fit_resample(X_train,y_train)
-# X_train_sm = sm.add_constant(X_train)
-# lm = sm.GLM(y_train,X_train_sm,family=sm.families.Binomial()).fit()
-# print(lm.summary())
+def scaling_trainset():
+    """Scaling des données des variables explicatives"""
+    print("Mise à l'echelle du trainset...", end="\r")
+    scaler = StandardScaler()
+    X_train[X_train.columns] = scaler.fit_transform(X_train)
+    X_test[X_test.columns] = scaler.transform(X_test)
+    print(f"{t.ctime(t.time())} : Trainset mis à l'echelle")
+        
+def fitting_KNN_model():
+    """Création d'un model K-Nearest Neighbours"""
+    print("Ajustement du model KNN...", end="\r")
+    global KNN
+    KNN = KNeighborsClassifier()
+    KNN.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model KNN ajusté")
+    
+def fitting_LR_model():
+    """Création d'un model de regression logistique"""
+    print("Ajustement du model LR...", end="\r")
+    global LR
+    LR = LogisticRegression()
+    LR.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model LR ajusté")
+    
+def fitting_RF_model():
+    """Création d'un model Random Forset"""
+    print("Ajustement du model RF...", end="\r")
+    global RF
+    RF = RandomForestClassifier()
+    RF.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model RF ajusté")
+    
+def testing_KNN_model():
+    """Test du model K-Nearest Neighbours"""
+    print("Ajustement du model KNN...", end="\r")
+    y_test_hat = KNN.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model KNN testé")
+    print(f"Accuracy KNN : {accuracy} %\n")
+    
+def testing_LR_model():
+    """Test du model de regression logistique"""
+    print("Ajustement du model LR...", end="\r")
+    y_test_hat = LR.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model LR testé")
+    print(f"Accuracy LR : {accuracy} %\n")
+    
+def testing_RF_model():
+    """Test du model Random Forset"""
+    print("Ajustement du model RF...", end="\r")
+    y_test_hat = RF.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model RF testé")
+    print(f"Accuracy RF : {accuracy} %\n")
+    
+    
+#     X_train, y_train = SMOTE(random_state=1,n_jobs=-1).fit_resample(X_train,y_train)
+#     X_train_sm = sm.add_constant(X_train)
+#     lm = sm.GLM(y_train,X_train_sm,family=sm.families.Binomial()).fit()
+#     print(lm.summary())
 
 # def vif(data):
 #     res = pd.DataFrame()
