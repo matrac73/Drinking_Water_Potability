@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import warnings
+import scipy
 import statsmodels.api as sm
 import sklearn
 from sklearn.preprocessing import StandardScaler
@@ -62,6 +63,17 @@ def cleaning_dataset():
     df['Sulfate'] = df['Sulfate'].fillna(df['Sulfate'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
     df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
     print(f"{t.ctime(t.time())} : Données nulles remplacées")
+
+def delete_outliers():
+    """Clean dataset by deleting outliers"""
+    global df
+    print("Suppression des données aberrantes...", end="\r")
+    z_scores = scipy.stats.zscore(df)
+    abs_z_scores = np.abs(z_scores)
+    filtered_entries = (abs_z_scores < 3).all(axis=1)
+    df = df[filtered_entries]
+    print(f"{t.ctime(t.time())} : Données aberrantes remplacées")
+
 
 def boxplot():
     """Diagramme moustache"""
