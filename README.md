@@ -30,7 +30,7 @@ python -m pip install -r requirements.txt
 ``` bash
 python -m ipykernel install --user --name=drinking_water_potability
 ```
-9 . Lancer Jupyter Lab
+9 . Lancer Jupyter Lab dans une nouvelle fenêtre de commande anaconda powershell
 ``` bash
 jupyter lab
 ```
