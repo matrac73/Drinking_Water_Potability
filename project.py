@@ -13,6 +13,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import scipy.stats
 
 # from sklearn.metrics import log_loss
 # from sklearn.metrics import roc_auc_score
@@ -213,14 +214,16 @@ def tuning_SVM_hyperparameters(param_grid, method):
     return tuning_hyperparameters(SVM, param_grid, method)
 
 def tuning_hyperparameters(estimator, param_grid, method):
-    print("Recherche des meilleurs hyperparamètres...", end="\r")
+    print(f"Recherche des meilleurs hyperparamètres par méthode { method } ...", end="\r")
+    start_time = t.time()
     if method == "RandomizedSearchCV":
-        model = RandomizedSearchCV(estimator = estimator, param_distributions = param_grid, n_iter = 10, cv = 5, verbose=0, random_state=1984, n_jobs = -1)
+        model = RandomizedSearchCV(estimator = estimator, param_distributions = param_grid, n_iter = 100, cv = 5, verbose=0, random_state=1984, n_jobs = -1)
     if method == "GridSearchCV":
         model = GridSearchCV(estimator, param_grid, cv = 5, verbose=1, n_jobs = 1)
     model.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : Meilleurs hyperparamètres trouvés")
-    print(f"Meilleurs Hyperparamètres : {model.best_params_}")
+    print(f"{t.ctime(t.time())} : Meilleurs hyperparamètres trouvés                ")
+    print(f"Durée de la recherche : {round(t.time()-start_time, 2)} secondes")
+    print(f"Meilleurs Hyperparamètres par méthode { method } : {model.best_params_}")
     return model.best_params_
     
 def fitting_testing_best_RF_model(dict):
@@ -231,6 +234,30 @@ def fitting_testing_best_RF_model(dict):
     accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
     print(f"{t.ctime(t.time())} : meilleur model RF testé et ajusté")
     print(f"Accuracy RF : {accuracy} %\n")
+
+def fitting_kNN_tuned_model(dict):
+    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], weights=dict["weights"], leaf_size=dict["leaf_size"], p=dict["p"])
+    return fitting_tuned_model(kNN, "kNN")
+
+def fitting_LR_tuned_model(dict):
+    LR = LogisticRegression(C=dict['C'], penalty=dict['penalty'], solver=dict['solver'])
+    return fitting_tuned_model(LR, "LR")
+
+def fitting_RF_tuned_model(dict):
+    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
+    return fitting_tuned_model(RF, "RF")
+
+def fitting_SVM_tuned_model(dict):
+    SVC = SVC(kernel=dict['kernel'], C=dict['C'], gamma=dict['gamma'])
+    return fitting_tuned_model(SVC, "SVM")
+
+def fitting_tuned_model(model, model_name):
+    print(f"Ajustement et test du meilleur model {model_name} ...", end="\r")
+    model.fit(X_train, y_train)
+    y_test_hat = model.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : meilleur model {model_name} testé et ajusté")
+    print(f"Accuracy {model_name} : {accuracy} %\n")
     
     
     
