@@ -9,6 +9,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
@@ -145,12 +147,18 @@ def fitting_SVM_model():
     SVM = SVC()
     return fitting_model(SVM, "SVM")
 
+def fitting_XGboost_model():
+    """Création d'un model XGboost"""
+    global XGboost
+    XGboost = XGBClassifier()
+    return fitting_model(XGboost, "XGboost")
+
 def fitting_model(model, model_name):
     """Création d'un model"""
     print(f"Ajustement du model { model_name }...", end="\r")
     model.fit(X_train, y_train)
     print(f"{t.ctime(t.time())} : model { model_name } ajusté")
-    
+
 def testing_KNN_model():
     """Test du model K-Nearest Neighbours"""
     print("Ajustement du model KNN...", end="\r")
@@ -167,6 +175,10 @@ def testing_RF_model():
 def testing_SVM_model():
     """Test du model Support Vector Machine"""
     return testing_model(SVM, "SVM")
+
+def testing_XGboost_model():
+    """Test du model XGboost"""
+    return testing_model(XGboost, "XGboost")
 
 def testing_model(model, model_name):
     """Test du model"""
@@ -193,6 +205,10 @@ def tuning_SVM_hyperparameters(param_grid, method):
     global SVM
     return tuning_hyperparameters(SVM, param_grid, method)
 
+def tuning_XGboost_hyperparameters(param_grid, method):
+    global XGboost
+    return tuning_hyperparameters(XGboost, param_grid, method)
+
 def tuning_hyperparameters(estimator, param_grid, method):
     print(f"Recherche des meilleurs hyperparamètres par méthode { method } ...", end="\r")
     start_time = t.time()
@@ -207,25 +223,45 @@ def tuning_hyperparameters(estimator, param_grid, method):
     return model.best_params_
 
 def fitting_kNN_tuned_model(dict):
-    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], weights=dict["weights"], leaf_size=dict["leaf_size"], p=dict["p"])
+    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], 
+                               weights=dict["weights"], 
+                               leaf_size=dict["leaf_size"], 
+                               p=dict["p"])
     return fitting_tuned_model(kNN, "kNN")
 
 def fitting_LR_tuned_model(dict):
-    LR = LogisticRegression(C=dict['C'], penalty=dict['penalty'], solver=dict['solver'])
+    LR = LogisticRegression(C=dict['C'], 
+                            penalty=dict['penalty'], 
+                            solver=dict['solver'])
     return fitting_tuned_model(LR, "LR")
 
 def fitting_RF_tuned_model(dict):
-    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
+    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], 
+                                min_samples_split=dict["min_samples_split"], 
+                                min_samples_leaf=dict["min_samples_leaf"], 
+                                max_depth=dict["max_depth"], 
+                                bootstrap=dict["bootstrap"])
     return fitting_tuned_model(RF, "RF")
 
 def fitting_SVM_tuned_model(dict):
-    SVC = SVC(kernel=dict['kernel'], C=dict['C'], gamma=dict['gamma'])
-    return fitting_tuned_model(SVC, "SVM")
+    SVM = SVC(kernel = dict['kernel'], 
+              C = dict['C'], 
+              gamma = dict['gamma'])
+    return fitting_tuned_model(SVM, "SVM")
+
+def fitting_XGboost_tuned_model(dict):
+    XGBoost = XGBClassifier(gamma = dict['gamma'], 
+                            max_depth = dict['max_depth'], 
+                            min_child_weight = dict["min_child_weight"],  
+                            subsample = dict["subsample"], 
+                            colsample_bytree = dict["colsample_bytree"])
+    return fitting_tuned_model(XGBoost, "XGBoost")
 
 def fitting_tuned_model(model, model_name):
+    global metric, metric_name
     print(f"Ajustement et test du meilleur model {model_name} ...", end="\r")
     model.fit(X_train, y_train)
     y_test_hat = model.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    accuracy = round(metric(y_test, y_test_hat)*100, 2)
     print(f"{t.ctime(t.time())} : meilleur model {model_name} testé et ajusté")
-    print(f"Accuracy {model_name} : {accuracy} %\n")
+    print(f"{metric_name} {model_name} : {accuracy} %\n")
