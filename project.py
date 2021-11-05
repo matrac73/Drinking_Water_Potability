@@ -8,27 +8,13 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import scipy.stats
-
-# from sklearn.metrics import log_loss
-# from sklearn.metrics import roc_auc_score
-# import statsmodels.api as sm
-# import sklearn
-# from sklearn.preprocessing import StandardScaler
-# ,GridSearchCV
-# 
-
-# from sklearn.tree import DecisionTreeClassifier
-# from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier
-# from imblearn.over_sampling import SMOTE
-# from statsmodels.stats.outliers_influence import variance_inflation_factor
-# from sklearn.metrics import confusion_matrix
-# from sklearn.metrics import roc_curve
 
 def avoid_warnings():
     print("Supression des Warnings...", end="\r")
@@ -155,6 +141,14 @@ def fitting_SVM_model():
     SVM.fit(X_train, y_train)
     print(f"{t.ctime(t.time())} : model SVM ajusté")
     
+def fitting_XGboost_model():
+    """Création d'un model XGboost"""
+    print("Ajustement du model XGboost...", end="\r")
+    global XGboost
+    XGboost = XGBClassifier()
+    XGboost.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model XGboost ajusté")
+    
 def testing_KNN_model():
     """Test du model K-Nearest Neighbours"""
     print("Ajustement du model KNN...", end="\r")
@@ -187,15 +181,13 @@ def testing_SVM_model():
     print(f"{t.ctime(t.time())} : model SVM testé")
     print(f"Accuracy RF : {accuracy} %\n")
     
-def finding_best_RF_model(n_estimators, max_depth, min_samples_split, min_samples_leaf, bootstrap):
-    print("Recherche des meilleurs hyperparamètres de RF...", end="\r")
-    param_grid = {'n_estimators': n_estimators, 'max_depth': max_depth, 'min_samples_split': min_samples_split, 'min_samples_leaf': min_samples_leaf, 'bootstrap': bootstrap}
-    global RF_random
-    RF_random = RandomizedSearchCV(estimator = RF, param_distributions = param_grid, n_iter = 100, cv = 3, verbose=0, random_state=1984, n_jobs = -1)
-    RF_random.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : Meilleurs hyperparamètre de RF trouvé")
-    print(f"Meilleurs Hyperparamètres : {RF_random.best_params_}")
-    return RF_random.best_params_
+def testing_XGboost_model():
+    """Test du model XGboost"""
+    print("Ajustement du model XGboost...", end="\r")
+    y_test_hat = XGboost.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model XGboost testé")
+    print(f"Accuracy XGboost : {accuracy} %\n")
 
 def tuning_kNN_hyperparameters(param_grid, method):
     global KNN
@@ -213,6 +205,10 @@ def tuning_SVM_hyperparameters(param_grid, method):
     global SVM
     return tuning_hyperparameters(SVM, param_grid, method)
 
+def tuning_XGboost_hyperparameters(param_grid, method):
+    global XGboost
+    return tuning_hyperparameters(XGboost, param_grid, method)
+
 def tuning_hyperparameters(estimator, param_grid, method):
     print(f"Recherche des meilleurs hyperparamètres par méthode { method } ...", end="\r")
     start_time = t.time()
@@ -225,31 +221,41 @@ def tuning_hyperparameters(estimator, param_grid, method):
     print(f"Durée de la recherche : {round(t.time()-start_time, 2)} secondes")
     print(f"Meilleurs Hyperparamètres par méthode { method } : {model.best_params_}")
     return model.best_params_
-    
-def fitting_testing_best_RF_model(dict):
-    print("Ajustement et test du meilleur model RF...", end="\r")
-    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
-    RF.fit(X_train, y_train)
-    y_test_hat = RF.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : meilleur model RF testé et ajusté")
-    print(f"Accuracy RF : {accuracy} %\n")
 
 def fitting_kNN_tuned_model(dict):
-    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], weights=dict["weights"], leaf_size=dict["leaf_size"], p=dict["p"])
+    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], 
+                               weights=dict["weights"], 
+                               leaf_size=dict["leaf_size"], 
+                               p=dict["p"])
     return fitting_tuned_model(kNN, "kNN")
 
 def fitting_LR_tuned_model(dict):
-    LR = LogisticRegression(C=dict['C'], penalty=dict['penalty'], solver=dict['solver'])
+    LR = LogisticRegression(C=dict['C'], 
+                            penalty=dict['penalty'], 
+                            solver=dict['solver'])
     return fitting_tuned_model(LR, "LR")
 
 def fitting_RF_tuned_model(dict):
-    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
+    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], 
+                                min_samples_split=dict["min_samples_split"], 
+                                min_samples_leaf=dict["min_samples_leaf"], 
+                                max_depth=dict["max_depth"], 
+                                bootstrap=dict["bootstrap"])
     return fitting_tuned_model(RF, "RF")
 
 def fitting_SVM_tuned_model(dict):
-    SVC = SVC(kernel=dict['kernel'], C=dict['C'], gamma=dict['gamma'])
-    return fitting_tuned_model(SVC, "SVM")
+    SVM = SVC(kernel = dict['kernel'], 
+              C = dict['C'], 
+              gamma = dict['gamma'])
+    return fitting_tuned_model(SVM, "SVM")
+
+def fitting_XGboost_tuned_model(dict):
+    XGBoost = XGBClassifier(gamma = dict['gamma'], 
+                            max_depth = dict['max_depth'], 
+                            min_child_weight = dict["min_child_weight"],  
+                            subsample = dict["subsample"], 
+                            colsample_bytree = dict["colsample_bytree"])
+    return fitting_tuned_model(XGBoost, "XGBoost")
 
 def fitting_tuned_model(model, model_name):
     print(f"Ajustement et test du meilleur model {model_name} ...", end="\r")
@@ -258,78 +264,3 @@ def fitting_tuned_model(model, model_name):
     accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
     print(f"{t.ctime(t.time())} : meilleur model {model_name} testé et ajusté")
     print(f"Accuracy {model_name} : {accuracy} %\n")
-    
-    
-    
-    
-    
-    
-    
-    
-    
-# X_train, y_train = SMOTE(random_state=1,n_jobs=-1).fit_resample(X_train,y_train)
-# X_train_sm = sm.add_constant(X_train)
-# lm = sm.GLM(y_train,X_train_sm,family=sm.families.Binomial()).fit()
-# print(lm.summary())
-
-# def vif(data):
-#     res = pd.DataFrame()
-#     res['Feature'] = data.columns
-#     res['VIF'] = [variance_inflation_factor(data.values,i) for i in range(data.shape[1])]
-#     return res
-# print(vif(X_train_sm))
-
-# X_test_sm = sm.add_constant(X_test)
-# y_train_pred = lm.predict(X_train_sm)
-
-# def tp_fp(cf):
-#     fp = cf[0,1]/(cf[0,0] + cf[0,1])
-#     tp = cf[1,1]/(cf[1,0] + cf[1,1])
-#     return fp,tp
-
-
-# def plot_roc(data,truth):
-#     cutoff = [0.001*i for i in range(1,1000)]
-#     x = []
-#     y = []
-#     for c in cutoff:
-#         #print(data)
-#         data_temp = data.apply(lambda x: 1 if x>=c else 0)
-#         cf = confusion_matrix(truth,data_temp)
-#         x.append(tp_fp(cf)[0])
-#         y.append(tp_fp(cf)[1])
-#     plt.plot(x,y)
-#     plt.show()
-
-# plot_roc(y_train_pred,y_train)
-
-# fp,tp,_ = roc_curve(y_train,y_train_pred)
-# plt.plot(fp,tp)
-
-# y_test_pred = lm.predict(X_test_sm).apply(lambda x: 1 if x>= 0.5 else 0)
-
-# cf = confusion_matrix(y_test,y_test_pred)
-# acc = (cf[0,0] + cf[1,1])/(cf[0,0] + cf[0,1] + cf[1,1] +cf[1,0])
-# tpr = cf[1,1]/(cf[1,0] + cf[1,1])
-# print(f"tpr = {tpr} accuracy = {acc}")
-
-# dt = DecisionTreeClassifier(random_state=1)
-# params = {
-#     "min_samples_split": [10,20,100],
-#     "max_depth": [5,10,50],
-#     "min_samples_leaf": [10,20,50],
-#     "max_leaf_nodes": [10,20,100]
-# }
-
-# dt_grid = GridSearchCV(estimator=dt,param_grid=params,cv=5,scoring='balanced_accuracy',verbose=10,n_jobs = -1).fit(X_train,y_train)
-
-# # gb = cv.best_estimator_
-
-# # y_train_pred = gb.predict(X_train)
-# # cf = confusion_matrix(y_train,y_train_pred)
-
-# # print(cf)
-# # acc = (cf[0,0] + cf[1,1])/np.sum(cf)
-# # recall = (cf[1,1])/(cf[1,1] + cf[1,0])
-# # spec = (cf[0,0])/(cf[0,1] + cf[0,0])
-# # print(f"Accuracy = {acc} Recall = {recall} Specificity = {spec}")
