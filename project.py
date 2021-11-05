@@ -7,10 +7,13 @@ import time as t
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+import scipy.stats
 
 # from sklearn.metrics import log_loss
 # from sklearn.metrics import roc_auc_score
@@ -19,7 +22,7 @@ from sklearn.preprocessing import StandardScaler
 # from sklearn.preprocessing import StandardScaler
 # ,GridSearchCV
 # 
-# from sklearn.svm import SVC
+
 # from sklearn.tree import DecisionTreeClassifier
 # from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier
 # from imblearn.over_sampling import SMOTE
@@ -74,6 +77,16 @@ def cleaning_dataset():
     df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
     print(f"{t.ctime(t.time())} : Données nulles remplacées")
 
+def delete_outliers():
+    """Clean dataset by deleting outliers"""
+    global df
+    print("Suppression des données aberrantes...", end="\r")
+    z_scores = scipy.stats.zscore(df)
+    abs_z_scores = np.abs(z_scores)
+    filtered_entries = (abs_z_scores < 3).all(axis=1)
+    df = df[filtered_entries]
+    print(f"{t.ctime(t.time())} : Données aberrantes remplacées")
+
 def boxplot():
     """Diagramme moustache"""
     columns = [x for x in df.columns if x != 'Potability'] # selection des variables explicatives
@@ -107,7 +120,7 @@ def scaling_trainset():
     print("Mise à l'echelle du trainset...", end="\r")
     scaler = StandardScaler()
     X_train[X_train.columns] = scaler.fit_transform(X_train)
-    X_test[X_test.columns] = scaler.transform(X_test)
+    X_test[X_test.columns] = scaler.fit_transform(X_test)
     print(f"{t.ctime(t.time())} : Trainset mis à l'echelle")
         
 def fitting_KNN_model():
@@ -138,7 +151,7 @@ def fitting_SVM_model():
     """Création d'un model Support Vector Machine"""
     print("Ajustement du model SVM...", end="\r")
     global SVM
-    SVM = RandomForestClassifier()
+    SVM = SVC()
     SVM.fit(X_train, y_train)
     print(f"{t.ctime(t.time())} : model SVM ajusté")
     
@@ -183,6 +196,35 @@ def finding_best_RF_model(n_estimators, max_depth, min_samples_split, min_sample
     print(f"{t.ctime(t.time())} : Meilleurs hyperparamètre de RF trouvé")
     print(f"Meilleurs Hyperparamètres : {RF_random.best_params_}")
     return RF_random.best_params_
+
+def tuning_kNN_hyperparameters(param_grid, method):
+    global KNN
+    return tuning_hyperparameters(KNN, param_grid, method)
+
+def tuning_LR_hyperparameters(param_grid, method):
+    global LR
+    return tuning_hyperparameters(LR, param_grid, method)
+
+def tuning_RF_hyperparameters(param_grid, method):
+    global RF
+    return tuning_hyperparameters(RF, param_grid, method)
+
+def tuning_SVM_hyperparameters(param_grid, method):
+    global SVM
+    return tuning_hyperparameters(SVM, param_grid, method)
+
+def tuning_hyperparameters(estimator, param_grid, method):
+    print(f"Recherche des meilleurs hyperparamètres par méthode { method } ...", end="\r")
+    start_time = t.time()
+    if method == "RandomizedSearchCV":
+        model = RandomizedSearchCV(estimator = estimator, param_distributions = param_grid, n_iter = 100, cv = 5, verbose=0, random_state=1984, n_jobs = -1)
+    if method == "GridSearchCV":
+        model = GridSearchCV(estimator, param_grid, cv = 5, verbose=1, n_jobs = 1)
+    model.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : Meilleurs hyperparamètres trouvés                ")
+    print(f"Durée de la recherche : {round(t.time()-start_time, 2)} secondes")
+    print(f"Meilleurs Hyperparamètres par méthode { method } : {model.best_params_}")
+    return model.best_params_
     
 def fitting_testing_best_RF_model(dict):
     print("Ajustement et test du meilleur model RF...", end="\r")
@@ -192,6 +234,30 @@ def fitting_testing_best_RF_model(dict):
     accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
     print(f"{t.ctime(t.time())} : meilleur model RF testé et ajusté")
     print(f"Accuracy RF : {accuracy} %\n")
+
+def fitting_kNN_tuned_model(dict):
+    kNN = KNeighborsClassifier(n_neighbors=dict["n_neighbors"], weights=dict["weights"], leaf_size=dict["leaf_size"], p=dict["p"])
+    return fitting_tuned_model(kNN, "kNN")
+
+def fitting_LR_tuned_model(dict):
+    LR = LogisticRegression(C=dict['C'], penalty=dict['penalty'], solver=dict['solver'])
+    return fitting_tuned_model(LR, "LR")
+
+def fitting_RF_tuned_model(dict):
+    RF = RandomForestClassifier(n_estimators=dict["n_estimators"], min_samples_split=dict["min_samples_split"], min_samples_leaf=dict["min_samples_leaf"], max_depth=dict["max_depth"], bootstrap=dict["bootstrap"])
+    return fitting_tuned_model(RF, "RF")
+
+def fitting_SVM_tuned_model(dict):
+    SVC = SVC(kernel=dict['kernel'], C=dict['C'], gamma=dict['gamma'])
+    return fitting_tuned_model(SVC, "SVM")
+
+def fitting_tuned_model(model, model_name):
+    print(f"Ajustement et test du meilleur model {model_name} ...", end="\r")
+    model.fit(X_train, y_train)
+    y_test_hat = model.predict(X_test)
+    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : meilleur model {model_name} testé et ajusté")
+    print(f"Accuracy {model_name} : {accuracy} %\n")
     
     
     
