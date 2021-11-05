@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, f1_score
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import RandomizedSearchCV
@@ -106,88 +107,87 @@ def scaling_trainset():
     print("Mise à l'echelle du trainset...", end="\r")
     scaler = StandardScaler()
     X_train[X_train.columns] = scaler.fit_transform(X_train)
-    X_test[X_test.columns] = scaler.fit_transform(X_test)
+    X_test[X_test.columns] = scaler.transform(X_test)
     print(f"{t.ctime(t.time())} : Trainset mis à l'echelle")
+
+def set_metric(metric_score):
+    global metric, metric_name
+    if metric_score == 'f1_score':
+        metric = f1_score
+        metric_name = 'F1_score'
+    elif metric_score == 'accuracy':
+        metric = accuracy_score
+        metric_name = 'Accuracy'
+    else:
+        print('Metric score not valid, using accuracy')
+        metric = accuracy_score
+        metric_name = 'Accuracy'
         
 def fitting_KNN_model():
     """Création d'un model K-Nearest Neighbours"""
-    print("Ajustement du model KNN...", end="\r")
     global KNN
     KNN = KNeighborsClassifier()
-    KNN.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : model KNN ajusté")
+    return fitting_model(KNN, "KNN")
     
 def fitting_LR_model():
     """Création d'un model de regression logistique"""
-    print("Ajustement du model LR...", end="\r")
     global LR
     LR = LogisticRegression()
-    LR.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : model LR ajusté")
+    return fitting_model(LR, "LR")
     
 def fitting_RF_model():
-    """Création d'un model Random Forset"""
-    print("Ajustement du model RF...", end="\r")
+    """Création d'un model Random Forest"""
     global RF
     RF = RandomForestClassifier()
-    RF.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : model RF ajusté")
+    return fitting_model(RF, "RF")
     
 def fitting_SVM_model():
     """Création d'un model Support Vector Machine"""
-    print("Ajustement du model SVM...", end="\r")
     global SVM
     SVM = SVC()
-    SVM.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : model SVM ajusté")
-    
+    return fitting_model(SVM, "SVM")
+
 def fitting_XGboost_model():
     """Création d'un model XGboost"""
-    print("Ajustement du model XGboost...", end="\r")
     global XGboost
     XGboost = XGBClassifier()
-    XGboost.fit(X_train, y_train)
-    print(f"{t.ctime(t.time())} : model XGboost ajusté")
-    
+    return fitting_model(XGboost, "XGboost")
+
+def fitting_model(model, model_name):
+    """Création d'un model"""
+    print(f"Ajustement du model { model_name }...", end="\r")
+    model.fit(X_train, y_train)
+    print(f"{t.ctime(t.time())} : model { model_name } ajusté")
+
 def testing_KNN_model():
     """Test du model K-Nearest Neighbours"""
     print("Ajustement du model KNN...", end="\r")
-    y_test_hat = KNN.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : model KNN testé")
-    print(f"Accuracy KNN : {accuracy} %\n")
+    return testing_model(KNN, "KNN")
     
 def testing_LR_model():
     """Test du model de regression logistique"""
-    print("Ajustement du model LR...", end="\r")
-    y_test_hat = LR.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : model LR testé")
-    print(f"Accuracy LR : {accuracy} %\n")
+    return testing_model(LR, "LR")
     
 def testing_RF_model():
     """Test du model Random Forset"""
-    print("Ajustement du model RF...", end="\r")
-    y_test_hat = RF.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : model RF testé")
-    print(f"Accuracy RF : {accuracy} %\n")
+    return testing_model(RF, "RF")
     
 def testing_SVM_model():
     """Test du model Support Vector Machine"""
-    print("Ajustement du model SVM...", end="\r")
-    y_test_hat = SVM.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : model SVM testé")
-    print(f"Accuracy RF : {accuracy} %\n")
-    
+    return testing_model(SVM, "SVM")
+
 def testing_XGboost_model():
     """Test du model XGboost"""
-    print("Ajustement du model XGboost...", end="\r")
-    y_test_hat = XGboost.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
-    print(f"{t.ctime(t.time())} : model XGboost testé")
-    print(f"Accuracy XGboost : {accuracy} %\n")
+    return testing_model(XGboost, "XGboost")
+
+def testing_model(model, model_name):
+    """Test du model"""
+    global metric, metric_name
+    print(f"Ajustement du model {model_name}...", end="\r")
+    y_test_hat = model.predict(X_test)
+    accuracy = round(metric(y_test, y_test_hat)*100, 2)
+    print(f"{t.ctime(t.time())} : model {model_name} testé")
+    print(f"{metric_name} {model_name} : {accuracy} %\n")
 
 def tuning_kNN_hyperparameters(param_grid, method):
     global KNN
@@ -258,9 +258,10 @@ def fitting_XGboost_tuned_model(dict):
     return fitting_tuned_model(XGBoost, "XGBoost")
 
 def fitting_tuned_model(model, model_name):
+    global metric, metric_name
     print(f"Ajustement et test du meilleur model {model_name} ...", end="\r")
     model.fit(X_train, y_train)
     y_test_hat = model.predict(X_test)
-    accuracy = round(accuracy_score(y_test, y_test_hat)*100, 2)
+    accuracy = round(metric(y_test, y_test_hat)*100, 2)
     print(f"{t.ctime(t.time())} : meilleur model {model_name} testé et ajusté")
-    print(f"Accuracy {model_name} : {accuracy} %\n")
+    print(f"{metric_name} {model_name} : {accuracy} %\n")
