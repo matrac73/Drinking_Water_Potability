@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import sys
 import warnings
 import time as t
 from sklearn.linear_model import LogisticRegression
@@ -56,23 +57,40 @@ def check_null_values(disp):
     if disp:
         print(dfn.sum()) # afficher les valeurs manquantes au dataset
 
-def cleaning_dataset():
-    """Clean dataset by replacing missing values"""
+def cleaning_dataset(mode = 'mean'):
+    """Clean dataset by replacing or deleting missing values"""
     print("Nettoyage des données nulles...", end="\r")
-    df['ph'] = df['ph'].fillna(df['ph'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
-    df['Sulfate'] = df['Sulfate'].fillna(df['Sulfate'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
-    df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
-    print(f"{t.ctime(t.time())} : Données nulles remplacées")
+    if mode == "mean":
+        df['ph'] = df['ph'].fillna(df['ph'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+        df['Sulfate'] = df['Sulfate'].fillna(df['Sulfate'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+        df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+        print(f"{t.ctime(t.time())} : Données nulles remplacées")
+    elif mode == "delete":
+        df.dropna(inplace=True)
+        print(f"{t.ctime(t.time())} : Données nulles supprimées")
+    
 
-def delete_outliers():
+def cope_outliers(mode = 'Q+1.5'):
     """Clean dataset by deleting outliers"""
     global df
-    print("Suppression des données aberrantes...", end="\r")
-    z_scores = scipy.stats.zscore(df)
-    abs_z_scores = np.abs(z_scores)
-    filtered_entries = (abs_z_scores < 3).all(axis=1)
-    df = df[filtered_entries]
-    print(f"{t.ctime(t.time())} : Données aberrantes remplacées")
+    print("Modification des données aberrantes...", end="\r")
+    
+    columns = [x for x in df.columns if x != 'Potability']
+    Q1, Q3 = df.quantile(.25), df.quantile(.75)
+    IQR = Q3 - Q1
+    if mode == "Q+1.5":
+        for k in columns :
+            df.loc[df[k] >= Q3[k]+1.5*IQR[k], k] = Q3[k]+1.5*IQR[k]
+            df.loc[df[k] <= Q1[k]-1.5*IQR[k], k] = Q1[k]-1.5*IQR[k]
+    elif mode == "Q":
+        for k in columns :
+            df.loc[df[k] >= Q3[k], k] = Q3[k]
+            df.loc[df[k] <= Q1[k], k] = Q1[k]
+    elif mode == "delete":
+        for k in columns :
+            df.drop(list(df.loc[df[k] >= Q3[k]+1.5*IQR[k], k].index))
+            df.drop(list(df.loc[df[k] <= Q1[k]-1.5*IQR[k], k].index))
+    print(f"{t.ctime(t.time())} : Données aberrantes gérées")
 
 def boxplot():
     """Diagramme moustache"""
