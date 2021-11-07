@@ -63,7 +63,7 @@ def cleaning_dataset(mode = 'mean'):
     if mode == "mean":
         df['ph'] = df['ph'].fillna(df['ph'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
         df['Sulfate'] = df['Sulfate'].fillna(df['Sulfate'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
-        df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].median()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
+        df['Trihalomethanes'] = df['Trihalomethanes'].fillna(df['Trihalomethanes'].mean()) # remplacer les valeurs manquantes par la moyenne (distribution normale)
         print(f"{t.ctime(t.time())} : Données nulles remplacées")
     elif mode == "delete":
         df.dropna(inplace=True)
